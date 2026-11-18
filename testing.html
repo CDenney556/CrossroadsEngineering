@@ -42,7 +42,7 @@
       <li><a href="#antenna">Antenna simulation</a> <span class="status done">Done</span></li>
       <li><a href="#battery">Battery life and burst voltage</a> <span class="status done">Done</span></li>
       <li><a href="#stereo">Stereo camera field test</a> <span class="status done">Done</span></li>
-      <li><a href="#two-lane">Two-lane works-like model</a> <span class="status">In progress</span></li>
+      <li><a href="#works-like">Works-like prototype</a> <span class="status">In progress</span></li>
       <li><a href="#bms-bench">BMS bench tests</a> <span class="status">Planned</span></li>
     </ul>
   </div>
@@ -250,16 +250,18 @@
   </div>
 </section>
 
-<!-- ---------------- TWO-LANE MODEL ---------------- -->
-<section id="two-lane" class="test">
+<!-- ---------------- WORKS-LIKE PROTOTYPE ---------------- -->
+<section id="works-like" class="test">
   <div class="wrap">
-    <div class="rule-head"><h2>Two-lane works-like model</h2></div>
-    <p class="test-meta">Cameron Denney. Puck and cabinet. <span class="status">In progress</span></p>
+    <div class="rule-head"><h2>Works-like prototype</h2></div>
+    <p class="test-meta">Team. The whole system, end to end. <span class="status">In progress</span></p>
     <div class="text">
-      <p><strong>What we want to know:</strong> whether the fixes from the vehicle pass test work together on real hardware: Algorithm B on the puck, and the cabinet's next-lane check.</p>
-      <p><strong>How it works:</strong> a 1:64 scale two-lane track with a magnetometer under each lane. A SparkFun RedBoard plays the puck, reading both sensors and running Algorithm B for each lane. A Raspberry Pi plays the cabinet: it counts each lane's cars and, when both lanes fire at once, drops the weaker one if its peak is under 0.3 times the stronger one. Diecast cars carry a steel strip so the sensors can see them.</p>
-      <p><strong>So far:</strong> the detection code was tested on a computer with simulated passes and realistic noise. It counted every pass exactly once and had no false triggers in 30 minutes of noise alone. A simulated two-minute session with 28 cars matched the counts exactly and dropped all 16 next-lane bumps. It hasn't run on the real sensors yet.</p>
+      <p><strong>What we want to show:</strong> the whole idea working in one piece. A car passes over two pucks, the pucks tell the control computer it's coming, the computer predicts when it will reach the light, and the light changes for it.</p>
+      <p><strong>How it works:</strong> a single scale-model lane with two magnetometers along it, standing in for two pucks. A model car carrying a bit of steel rolls over both. The time between the two detections gives the car's speed, the same way the real computer gets it from a pair of pucks, and from that the computer predicts when the car will reach the stop line. A traffic signal built from LEDs changes in time for it.</p>
+      <p>The point is to demonstrate the sequence: detect, predict, change the light. Matching real-world vehicle timing is secondary for this prototype, since a model car on a short track won't move like a car on Kipling.</p>
+      <p><strong>So far:</strong> the detection code the pucks will run (Algorithm B) has already passed desktop tests with simulated passes and realistic noise. It counted every pass exactly once and had no false triggers in 30 minutes of noise alone.</p>
     </div>
+    <figure style="max-width:32rem"><div class="ph">Photo of the works-like prototype</div><figcaption>Photos coming once it's built.</figcaption></figure>
   </div>
 </section>
 
@@ -267,7 +269,7 @@
 <section id="bms-bench" class="test">
   <div class="wrap">
     <div class="rule-head"><h2>BMS bench tests</h2></div>
-    <p class="test-meta">Isaac Lucero. Puck power. <span class="status">Planned</span></p>
+    <p class="test-meta">Cameron Denney. Puck power. <span class="status">Planned</span></p>
     <div class="text">
       <p>These tests check the battery management circuit on the bench, using a power supply and an electronic load in place of the real lithium cells, so no cell is put at risk during a fault test.</p>
     </div>
