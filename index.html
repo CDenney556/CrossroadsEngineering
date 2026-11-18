@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crossroad Engineering: Reducing Off-Peak Delays at Traffic Signals</title>
+<meta name="description" content="A low-cost add-on that makes existing traffic signals adaptive during off-peak hours.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/img/team-logo.png" alt="Crossroad Engineering, home" width="640" height="114"></a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="design.html">Design</a></li>
+        <li><a href="testing.html">Testing</a></li>
+        <li><a href="gallery.html">Photos</a></li>
+        <li><a href="report.html">Report</a></li>
+        <li><a href="sources.html">Sources</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<!-- ============ HOME ============ -->
+<section class="hero">
+  <div class="wrap">
+    <p class="when">S Kipling St &amp; W Stanford Ave, Lakewood, Colorado. August 31, 2026, 10:11 PM.</p>
+    <h1>Over two minutes at a red light, with nobody coming.</h1>
+    <p class="lede">During our field observation, a Jeep sat at the side-street red for more than two minutes. Kipling was empty for <strong>62 seconds</strong> of that wait, including one gap of over 20 seconds. The driver gave up, turned right, and made a U-turn down the road.</p>
+    <p class="lede">We're Crossroad Engineering. This is our design for making the signals cities already own adapt to the traffic that's actually there.</p>
+    <div class="hero-links">
+      <a class="button" href="report.html">Read the full report</a>
+      <a class="button secondary" href="testing.html">See how we tested it</a>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="wrap split wide-left">
+    <div>
+      <div class="rule-head"><h2>The problem</h2></div>
+      <ul class="numbers">
+        <li><b>5&ndash;10%</b> <span>of all U.S. traffic delay happens at traffic signals <a href="sources.html#ref-1">[1]</a></span></li>
+        <li><b>60.2%</b> <span>of trips start off-peak, outside the hours signal timing is tuned for <a href="sources.html#ref-2">[2]</a></span></li>
+        <li><b>56</b> <span>gaps of 12 seconds or more on Kipling in one hour, while side-street drivers waited 48&ndash;120 seconds</span></li>
+      </ul>
+    </div>
+    <div class="text">
+      <p>Twelve seconds is about what it takes to serve one side-street car: the yellows, the all-red, and the six-second minimum green. Kipling had 56 of those gaps in the hour we watched, and the side street still waited.</p>
+      <p>The signal at Kipling and Stanford isn't a dumb timer. It detects cars. But it runs a time-of-day plan built around a fixed cycle, so a car that arrives at the wrong point in the cycle waits for it to come around. Lakewood switches it to free operation only between 10:30 PM and 5:00 AM.</p>
+    </div>
+  </div>
+</section>
+
+<section id="fix">
+  <div class="wrap split wide-left">
+    <div>
+      <div class="rule-head"><h2>The fix: adaptive signal control</h2></div>
+      <p class="text">Adaptive signals time themselves to the traffic actually arriving, instead of following a fixed plan. The idea isn't new. Almost no one uses it.</p>
+      <ul class="numbers">
+        <li><b>&lt;1%</b> <span>of U.S. signals have adaptive control <a href="sources.html#ref-3">[3]</a></span></li>
+        <li><b>$8k&ndash;35k</b> <span>per intersection for existing adaptive systems <a href="sources.html#ref-5">[5]</a></span></li>
+      </ul>
+    </div>
+    <div class="text">
+      <p>What holds cities back is cost, the expertise to run it, and no easy way to measure the payoff <a href="sources.html#ref-3">[3]</a>. So our goal was narrower than a full adaptive system:</p>
+      <p><strong>How might we reduce delays for drivers at signalized intersections during off-peak hours?</strong></p>
+      <p>Our answer is an add-on that works with the controller a city already has. It only steps in during low-demand hours, when fixed timing does the most damage, and it never touches safety timing or emergency preemption.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="rule-head"><h2>How it works</h2></div>
+    <ol class="flow">
+      <li><strong>Pucks in the road</strong> time each car 300&ndash;500 m before the light, so the system knows where the gaps will be before they arrive.</li>
+      <li><strong>The sensor head</strong> on the mast arm confirms each car near the light and checks that the crosswalks are clear.</li>
+      <li><strong>The cabinet computer</strong> predicts when each car will reach the stop bar and finds gaps long enough to serve the side street.</li>
+      <li><strong>The existing controller</strong> gets a standard call and changes the light. Its minimum greens, clearances, and preemption all stay in charge.</li>
+    </ol>
+
+    <figure style="margin-top:2rem">
+      <a href="assets/photos/final-design-overview.jpg"><img src="assets/photos/final-design-overview.jpg" alt="Drawing of the intersection: pucks in the approach lane, the sensor head on the mast arm, and the signal cabinet at the corner" loading="lazy"></a>
+      <figcaption>The proposed design at an intersection. (Drawn by Kyle Lindenmeyer)</figcaption>
+    </figure>
+
+    <h3 style="margin-top:2.5rem">The three parts</h3>
+    <ul class="parts">
+      <li>
+        <h3><a href="design.html#puck">Puck</a></h3>
+        <p>A 6-inch sealed cylinder flush with the road. A magnetometer senses each car bending Earth's magnetic field, and a mesh radio reports it. Four D cells last 10+ years.</p>
+        <p class="who">Cameron Denney, Isaac Lucero</p>
+      </li>
+      <li>
+        <h3><a href="design.html#fusion">Sensor head</a></h3>
+        <p>Two cameras about a meter apart plus a LiDAR on the existing mast arm. It measures each car's range and speed out to 150 m and watches the crosswalks.</p>
+        <p class="who">Simon Wright</p>
+      </li>
+      <li>
+        <h3><a href="design.html#compute">Cabinet computer</a></h3>
+        <p>An industrial computer that fits in the spare space of a standard signal cabinet and talks to the existing controller over NTCIP 1202.</p>
+        <p class="who">Kyle Lindenmeyer</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section id="status">
+  <div class="wrap split">
+    <div class="text">
+      <div class="rule-head"><h2>Where it stands</h2></div>
+      <p>The detection hardware and the arrival math work. In simulation, every car arrived inside its predicted window, and in our parking-lot test the puck counted 20 of 20 passes exactly once.</p>
+      <p>The switching rules need more work. On the hour we observed at Kipling and Stanford, where traffic comes in waves, they cut the average side-street wait by 23%. On a full weekday of steady, busy traffic, today's timing beat them in every hour. We're retuning them with hourly data from the City of Lakewood.</p>
+      <p><a class="button on-light" href="testing.html">Read every test</a></p>
+    </div>
+    <div class="text">
+      <div class="rule-head"><h2>What stakeholders told us</h2></div>
+      <p><strong>Kelly Dunne, PE, PTOE, City of Lakewood:</strong> a fix has to be reasonably priced, work in any weather, and leave peak-hour timing alone. <em>So the system runs off-peak only, and the pucks work in snow and ice.</em></p>
+      <p><strong>Jim Quinn, retired Denver firefighter:</strong> preemption already clears intersections with a "quick yellow, quick red." <em>So preemption always overrides our system.</em></p>
+      <p><strong>Paul Kuenne, delivery driver:</strong> the failure he runs into most is sitting at a red with few or no cars coming. <em>That's exactly the case we serve.</em></p>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="names">Cameron Denney, Kyle Lindenmeyer, Simon Wright, Isaac Lucero</p>
+    <p>Red Rocks Community College, EGG 1040 Engineering Design, Fall 2026</p>
+    <p class="small">Reducing Off-Peak Delays at Traffic Signals. <a href="report.html">Read the full report</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

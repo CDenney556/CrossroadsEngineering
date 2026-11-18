@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design | Crossroad Engineering</title>
+<meta name="description" content="How the in-road puck, the mast-arm sensor head, and the cabinet computer work.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/img/team-logo.png" alt="Crossroad Engineering, home" width="640" height="114"></a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="design.html" aria-current="page">Design</a></li>
+        <li><a href="testing.html">Testing</a></li>
+        <li><a href="gallery.html">Photos</a></li>
+        <li><a href="report.html">Report</a></li>
+        <li><a href="sources.html">Sources</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<!-- ============ DESIGN ============ -->
+<section>
+  <div class="wrap">
+    <div class="rule-head"><h1>Design</h1></div>
+    <div class="text">
+      <p>The system has three parts, in the order the data moves: the puck in the road, the sensor head on the mast arm, and the computer in the signal cabinet. Each one was designed by a different team member, and each section below covers what it does, how it works, and what it's made of. The <a href="report.html">full report</a> has every calculation and decision matrix.</p>
+      <p>In the sketches, teal is our hardware and gray is equipment that's already at the intersection.</p>
+    </div>
+    <ul>
+      <li><a href="#puck">Puck</a> and its <a href="#puck-electronics">electronics</a></li>
+      <li><a href="#power">Puck power: battery pack and BMS</a></li>
+      <li><a href="#fusion">Sensor head</a></li>
+      <li><a href="#compute">Cabinet computer</a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ---------------- PUCK ---------------- -->
+<section id="puck">
+  <div class="wrap">
+    <div class="rule-head"><h2>Puck</h2></div>
+    <div class="split">
+      <div class="text">
+        <p class="test-meta">Cameron Denney</p>
+        <p>Pucks go in the travel lane every 100 m, out to 300&ndash;500 m from the stop bar. Each one counts the cars that pass over it and reports them to the intersection, so the computer knows about each car, and each gap, well before it arrives.</p>
+        <h3>How it detects a car</h3>
+        <p>A car is a large mass of steel, and it bends Earth's magnetic field as it passes. A 3-axis magnetometer 50 mm under the road measures that change. The puck checks the field 10 times a second while it waits. When the change crosses a threshold, it switches to 200 readings a second until the car has gone, timestamps the detection, and sends a short packet to the intersection over a 915 MHz LoRa mesh radio.</p>
+        <p>The intersection sends out a regular time beacon that keeps every puck's clock in sync. That lets the computer work out speed from the difference between two pucks' timestamps, not from when the radio packets happened to arrive.</p>
+        <h3>Why the layers are in this order</h3>
+        <ul>
+          <li><strong>Antenna on top,</strong> under a 2.5 mm plastic lid, for the clearest path to the radio network.</li>
+          <li><strong>Magnetometer 50 mm down,</strong> on nylon standoffs, kept as far as possible from the batteries and the boards that carry current. Hardware near it is nylon or brass.</li>
+          <li><strong>Batteries at the bottom.</strong> Their low-magnetic cells add only about 0.25 &micro;T at the sensor, a fixed offset the empty-road baseline removes.</li>
+        </ul>
+      </div>
+      <figure>
+        <div class="sketch"><img src="assets/img/sketch-puck.svg" alt="Cutaway of the puck in the road: antenna at the top, magnetometer 50 mm down, three electronics boards, and four D cells from 120 to 200 mm deep, in a 152 mm housing flush with the road surface." width="694" height="468"></div>
+        <figcaption>The puck in the road, to scale. Simplified from the Module 3 section view.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="puck-electronics">
+  <div class="wrap">
+    <div class="rule-head"><h2>Puck electronics</h2></div>
+    <div class="text">
+      <p>The electronics are split across separate boards, so each one can be designed and tested on its own, and so the radio and its return currents stay away from the magnetometer. The compute, radio, and BMS boards share the same 60 &times; 60 mm outline and one set of threaded rods.</p>
+      <ul>
+        <li><strong>Compute board:</strong> the microcontroller that runs detection, plus the 3.0 V regulator and the 32.768 kHz clock crystal.</li>
+        <li><strong>Magnetometer board:</strong> the sensor on its own small board, on a short cable so it can sit as far from the battery and radio as possible.</li>
+        <li><strong>Radio board:</strong> the LoRa module and a Nordic nRF52840 that runs the mesh networking.</li>
+        <li><strong>BMS board:</strong> part of the <a href="#power">power subsystem</a>, sitting right on the cells.</li>
+      </ul>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Main parts</caption>
+        <thead><tr><th>Part</th><th>Model</th><th>Why this one</th></tr></thead>
+        <tbody>
+          <tr><td>Microcontroller</td><td>TI MSPM0L1117</td><td>Arm Cortex-M0+, 1.5 &micro;A standby with the clock running, rated &minus;40 to +125 &deg;C</td></tr>
+          <tr><td>Magnetometer</td><td>MEMSIC MMC5983MA</td><td>3-axis, 18-bit, built-in SET/RESET to clear drift over a sealed 10-year life, automotive qualified</td></tr>
+          <tr><td>LoRa module</td><td>Ebyte E22-900M22S</td><td>Semtech SX1262 at 915 MHz, capped at +14 dBm in this design</td></tr>
+          <tr><td>Mesh controller</td><td>Nordic nRF52840</td><td>Runs the LoRa module and all of the mesh networking</td></tr>
+          <tr><td>3.0 V regulator</td><td>TI TPS7A0230P</td><td>25 nA quiescent current, so it costs almost nothing in standby</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Compute board schematic</h3>
+    <div class="split wide-left">
+      <figure>
+        <a href="assets/photos/cameron-m3-kicad-schematic.png"><img src="assets/photos/cameron-m3-kicad-schematic.png" alt="Compute board schematic in KiCad" loading="lazy"></a>
+        <figcaption>Compute board schematic in KiCad 10: microcontroller, 3.0 V regulator, clock crystal, programming header, test points, and the three board connectors. Tap to open it full size. (Cameron Denney)</figcaption>
+      </figure>
+      <div class="text">
+        <p>The schematic is complete and passes KiCad's electrical rules check with no errors. Three connectors tie the boards together:</p>
+        <ul>
+          <li><strong>J1</strong> to the power subsystem: battery supply, ground, the fuel gauge's I&sup2;C bus, and status lines.</li>
+          <li><strong>J2</strong> to the magnetometer board: SPI and the sensor's interrupt.</li>
+          <li><strong>J3</strong> to the radio board: a UART link plus wake, interrupt, beacon sync, and reset lines.</li>
+        </ul>
+        <div class="note">
+          <p><strong>Still to update:</strong> the schematic was drawn before the battery management board was revised, so J1 still needs to be brought in line with the new BMS.</p>
+        </div>
+        <p style="margin-top:1rem">KiCad files: <a href="https://github.com/CDenney556/puck-eng1040">puck-eng1040 on GitHub</a>.</p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Average current drawn by the puck electronics (4,320 cars per lane per day)</caption>
+        <thead><tr><th>Load</th><th class="num">Normal (&micro;A)</th><th class="num">Relaying for 4 other pucks (&micro;A)</th></tr></thead>
+        <tbody>
+          <tr><td>Radio transmit</td><td class="num">54</td><td class="num">270</td></tr>
+          <tr><td>Magnetometer</td><td class="num">69</td><td class="num">69</td></tr>
+          <tr><td>Radio listening</td><td class="num">63</td><td class="num">63</td></tr>
+          <tr><td>Microcontroller</td><td class="num">13</td><td class="num">13</td></tr>
+          <tr><td>Radio receiving packets</td><td class="num">2</td><td class="num">26</td></tr>
+          <tr><td>Mesh controller</td><td class="num">4</td><td class="num">8</td></tr>
+          <tr><td>3.0 V regulator</td><td class="num">&lt;0.1</td><td class="num">&lt;0.1</td></tr>
+          <tr><th>Average</th><th class="num">204</th><th class="num">448</th></tr>
+          <tr><td>Charge over 10 years</td><td class="num">17.9 Ah</td><td class="num">39.3 Ah</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text">The relaying column only applies while a puck's direct link to the intersection is down, so it's the upper bound for planning, not the everyday load.</p>
+  </div>
+</section>
+
+<!-- ---------------- POWER ---------------- -->
+<section id="power">
+  <div class="wrap split">
+    <div class="text">
+      <div class="rule-head"><h2>Puck power: battery pack and BMS</h2></div>
+      <p class="test-meta">Cameron Denney, Isaac Lucero</p>
+      <p>The power subsystem has to run the puck for 10 years with no outside power and no service. It holds the cells, protects them from each other, tracks how much charge is left, and warns before the battery runs low.</p>
+      <ul>
+        <li><strong>Four Saft LS33600LM D cells</strong> (lithium-thionyl chloride, 68 Ah total) stand upright in parallel in an 82 mm holder.</li>
+        <li><strong>Each cell has a fuse and two ideal diodes in series.</strong> Primary cells must never be charged, and in a parallel pack a weak cell could be charged by its neighbors. The second diode covers the case where the first one fails.</li>
+        <li><strong>A fuel gauge</strong> wakes for a few seconds every 8 hours, timed to a radio burst so it has a current pulse to measure.</li>
+        <li><strong>A separate supervisor chip</strong> flags the battery if it drops below 3.2 V, even if the firmware has stopped.</li>
+      </ul>
+    </div>
+    <div>
+      <ul class="numbers" style="margin-top:4.5rem">
+        <li><b>20.2 yr</b> <span>until the pack hits its 20% reserve at the normal load (10-year target)</span></li>
+        <li><b>10.4 yr</b> <span>if the puck relayed for its neighbors the entire time</span></li>
+        <li><b>1.9 &micro;A</b> <span>drawn by the BMS itself in standby</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- FUSION ---------------- -->
+<section id="fusion">
+  <div class="wrap">
+    <div class="rule-head"><h2>Sensor head</h2></div>
+    <div class="split">
+      <div class="text">
+        <p class="test-meta">Simon Wright</p>
+        <p>The sensor head is the high-accuracy half of detection. It mounts on the existing mast arm, tracks each car as it approaches, and sends its range, speed, and predicted arrival time to the cabinet computer. It also gives the system a view of the crosswalks, so the computer never asks for a change while someone is still crossing.</p>
+        <h3>How it works</h3>
+        <p>Two cameras spaced apart see the road from slightly different angles, the way your two eyes do. Comparing the two images gives the distance to each car, and tracking that distance over time gives its speed. A LiDAR adds a second range measurement, mainly to keep the camera pair calibrated.</p>
+        <h3>Main parts</h3>
+        <ul>
+          <li><strong>Two D3 Embedded IMX390 cameras:</strong> 1920 &times; 1080 at 30 fps, HDR, sealed to IP67, rated &minus;40 to +85 &deg;C.</li>
+          <li><strong>Benewake TF03 LiDAR</strong> for range.</li>
+          <li><strong>TI TDA4VM processor</strong> with a built-in stereo engine, so the image processing happens on the pole and only small results go down to the cabinet.</li>
+          <li><strong>One PoE++ cable</strong> carries both power and data from the cabinet.</li>
+        </ul>
+      </div>
+      <figure>
+        <a href="assets/photos/simon-m3-block-sketch.png"><img src="assets/photos/simon-m3-block-sketch.png" alt="Block sketch of the sensor head: cameras and LiDAR in, processor, range and speed results out to the cabinet computer" loading="lazy"></a>
+        <figcaption>Block sketch of the pole-mounted sensor head, from inputs to outputs. (Drawn by Simon Wright)</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- COMPUTE ---------------- -->
+<section id="compute">
+  <div class="wrap">
+    <div class="rule-head"><h2>Cabinet computer</h2></div>
+    <div class="split">
+      <div class="text">
+        <p class="test-meta">Kyle Lindenmeyer</p>
+        <p>The cabinet computer makes the timing decisions. It takes in puck detections from a radio node over USB and the sensor head's results over Ethernet, predicts when each car will reach the stop bar, and sends the existing controller a standard call when the side street can go. It connects to the controller over NTCIP 1202, the protocol Lakewood's Econolite Cobalt controllers already speak.</p>
+        <h3>Choosing the computer</h3>
+        <p>A signal cabinet has to keep running from &minus;34 to +74 &deg;C, so temperature was weighted at 30% in the decision matrix. The Toradex Verdin iMX8M Plus on an Ivy Plus carrier board is rated &minus;40 to +85 &deg;C and scored 4.55 out of 5, ahead of the Raspberry Pi 5 (2.80, rated only 0 to +70 &deg;C) and the NVIDIA Jetson Orin Nano developer kit (2.35, not rated for a cabinet), even though it costs the most.</p>
+        <h3>Software</h3>
+        <p>The timing decisions run in C++ on FreeRTOS, on the Verdin's real-time core, so they happen on a predictable schedule. Linux on the main cores handles logging, alerts, networking, and updates.</p>
+      </div>
+      <figure>
+        <div class="sketch"><img src="assets/img/sketch-compute.svg" alt="Signal cabinet interior: our power supply, network switch, computer, and radio in the upper space, next to the existing controller, MMU, load switches, and terminal panel. Lines show the link to the controller, the PoE++ cable to the mast, and the radio antenna." width="688" height="484"></div>
+        <figcaption>Our four parts in the spare space of a standard cabinet. Simplified from Kyle's cabinet interior drawing.</figcaption>
+      </figure>
+    </div>
+
+    <h3>Predicting arrivals</h3>
+    <div class="text">
+      <p>Pucks are installed in pairs. Each puck timestamps a car at its first magnetic peak, so both pucks in a pair time the same point on the car, whatever its length. From there the computer:</p>
+      <ol>
+        <li>gets the car's speed from the time between the two pucks in a pair,</li>
+        <li>estimates when it will reach the stop bar at that speed,</li>
+        <li>updates that estimate at every pair of pucks it crosses, along with its average speed and whether it's speeding up or slowing down,</li>
+        <li>treats each arrival time as a window, since drivers drift a few mph either way,</li>
+        <li>and measures gaps between cars from the safe edges of those windows.</li>
+      </ol>
+      <p>When a gap is long enough to serve the side street, the computer places the call. If any sensor or the computer itself fails, the signal simply goes back to running on its own.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="names">Cameron Denney, Kyle Lindenmeyer, Simon Wright, Isaac Lucero</p>
+    <p>Red Rocks Community College, EGG 1040 Engineering Design, Fall 2026</p>
+    <p class="small">Reducing Off-Peak Delays at Traffic Signals. <a href="report.html">Read the full report</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

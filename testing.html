@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing | Crossroad Engineering</title>
+<meta name="description" content="Every test we ran on the design: what we wanted to know, how we tested it, and what we found.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/img/team-logo.png" alt="Crossroad Engineering, home" width="640" height="114"></a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="design.html">Design</a></li>
+        <li><a href="testing.html" aria-current="page">Testing</a></li>
+        <li><a href="gallery.html">Photos</a></li>
+        <li><a href="report.html">Report</a></li>
+        <li><a href="sources.html">Sources</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<!-- ============ TESTING ============ -->
+<section>
+  <div class="wrap">
+    <div class="rule-head"><h1>Testing</h1></div>
+    <div class="text">
+      <p>Each write-up below covers what we wanted to find out, how we tested it, what we found, and what changed in the design because of it. Some tests didn't go the way we hoped, and those are here too. The <a href="report.html">full report</a> has the complete data, and there are more photos on the <a href="gallery.html">photos page</a>.</p>
+    </div>
+    <h2 style="font-size:1.45rem;margin-top:1.5rem">Tests on this page</h2>
+    <ul class="test-index">
+      <li><a href="#simulator">Traffic simulator</a> <span class="status done">Done</span></li>
+      <li><a href="#maxwell">Magnetic simulation of a car</a> <span class="status done">Done</span></li>
+      <li><a href="#algorithm">Detection algorithm</a> <span class="status done">Done</span></li>
+      <li><a href="#vehicle-pass">Vehicle pass test</a> <span class="status done">Done</span></li>
+      <li><a href="#antenna">Antenna simulation</a> <span class="status done">Done</span></li>
+      <li><a href="#battery">Battery life and burst voltage</a> <span class="status done">Done</span></li>
+      <li><a href="#stereo">Stereo camera field test</a> <span class="status done">Done</span></li>
+      <li><a href="#two-lane">Two-lane works-like model</a> <span class="status">In progress</span></li>
+      <li><a href="#bms-bench">BMS bench tests</a> <span class="status">Planned</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ---------------- SIMULATOR ---------------- -->
+<section id="simulator" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Traffic simulator</h2></div>
+    <p class="test-meta">Kyle Lindenmeyer. Cabinet computer.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> whether the arrival math and our switching rules, working together, shorten side-street waits without adding delay on the main road.</p>
+      <p><strong>How we tested it:</strong> we won't build the cabinet computer for this course, so the test ran on a simulator that uses the same arrival math and rules the computer would. It's a Monte Carlo test: it generates random traffic, runs the same cars through two controllers (our rules and a model of how the signal runs today), and repeats that many times. Because both controllers see identical traffic, any difference in delay comes from the rules.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Test</th><th>Data</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Arrival math check</td><td>Every Kipling car in every run</td><td><span class="met">100%</span> of cars arrived inside their predicted window (92% if drivers change speed more than expected)</td></tr>
+          <tr><td>Full weekday</td><td>CDOT data for Kipling &amp; W 39th Ave, Wed. Nov. 4, 2026: 46,319 vehicles in 24 hours <a href="sources.html#ref-4">[4]</a></td><td><span class="not-met">Today's timing beat our rules in all 24 hours.</span> Side-street delay went from 23.9 to 31.7 vehicle-hours a day. Kipling stops dropped 9%.</td></tr>
+          <tr><td>The hour we observed</td><td>Our video of Kipling &amp; Stanford, Aug. 31, 10&ndash;11 PM: 323 Kipling cars, 11 side-street cars</td><td><span class="met">Average side-street wait down 23%</span>, from 46.3 to 35.8 s. Median from 35 to 27.4 s. About 2 of 322 Kipling cars stopped.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/kyle-m3-fieldhour.png"><img src="assets/photos/kyle-m3-fieldhour.png" alt="Measured vs. simulated side-street waits at Kipling & Stanford, 10&ndash;11 PM, averaged over 200 runs." loading="lazy"></a><figcaption>Measured vs. simulated side-street waits at Kipling &amp; Stanford, 10&ndash;11 PM, averaged over 200 runs.</figcaption></figure>
+      <figure><a href="assets/photos/kyle-m3-wednesday.png"><img src="assets/photos/kyle-m3-wednesday.png" alt="Side-street delay by hour on a full weekday, today's timing vs. our rules." loading="lazy"></a><figcaption>Side-street delay by hour on a full weekday, today's timing vs. our rules.</figcaption></figure>
+    </div>
+    <div class="outcome text">
+      <p><strong>What it showed:</strong> the math works. The computer always knew when Kipling cars were coming. The rules don't work yet on busy roads: they wait for a 17.5-second gap with no cars in either direction, which rarely comes on a road as busy as Kipling, so most side-street cars ended up waiting for the 60 or 90-second fallback. Where traffic arrives in waves with real gaps between them, like the hour we observed, the rules helped.</p>
+      <p><strong>What's next:</strong> the City of Lakewood has been asked for hourly volumes and timing at real intersections, so we can retune the rules and use the simulator to decide when off-peak mode should turn on and off. We'll also test an intersection of two main roads.</p>
+    </div>
+    <p class="text test-meta">Limits: side-street volumes in the weekday test were estimated, and left-turn arrows, pedestrians, and emergency preemption aren't modeled yet.</p>
+  </div>
+</section>
+
+<!-- ---------------- MAXWELL ---------------- -->
+<section id="maxwell" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Magnetic simulation of a car</h2></div>
+    <p class="test-meta">Cameron Denney. Puck.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> how big a signal a passing car makes at a sensor 50 mm under the road, and how far to either side of the puck a car can be and still be seen.</p>
+      <p><strong>How we tested it:</strong> a 4.5 m sedan (steel floor pan, cast-iron engine block, two steel axles, 150 mm ground clearance) was modeled in Ansys Maxwell 3D, with Earth's field set to the real values for our site. The car was moved along the lane in 0.25 m steps (57 positions) and across the lane in 0.5 m steps (231 positions).</p>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/cameron-m3-maxwell-signature.png"><img src="assets/photos/cameron-m3-maxwell-signature.png" alt="Simulated change in field at the sensor as the car passes over the puck." loading="lazy"></a><figcaption>Simulated change in field at the sensor as the car passes over the puck.</figcaption></figure>
+      <figure><a href="assets/photos/cameron-m3-zone-map.png"><img src="assets/photos/cameron-m3-zone-map.png" alt="Detection zone: the strongest change at the sensor for each car position, with the lane lines marked." loading="lazy"></a><figcaption>Detection zone: the strongest change at the sensor for each car position, with the lane lines marked.</figcaption></figure>
+    </div>
+    <div class="outcome text">
+      <p><strong>What it showed:</strong> a centered car changes the field by about 31 &micro;T at the sensor. But with the middle of the car directly over the puck, the change drops to about 1.2 &micro;T, close to the threshold. A car stopped in a queue in that spot could look like an empty lane if the puck judged it from a single reading.</p>
+      <p><strong>What changed:</strong> the detection rule now follows a car from the moment it arrives until the field settles, and a stopped car holds the puck in an "occupied" state instead of being detected again.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- ALGORITHM ---------------- -->
+<section id="algorithm" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Detection algorithm</h2></div>
+    <p class="test-meta">Cameron Denney. Puck.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> whether the puck counts each car exactly once.</p>
+      <p><strong>How we tested it:</strong> the simulated car signals were run through two detection algorithms with realistic sensor noise added, at 5, 20, 45, and 65 mph, in both directions, at 0&ndash;1.5 m from the puck, with 400 random trials for each case.</p>
+      <ul>
+        <li><strong>Algorithm A (the original plan):</strong> a reading over the threshold starts a fixed half-second burst of fast readings, then the puck goes back to waiting.</li>
+        <li><strong>Algorithm B (revised):</strong> the burst keeps going until the field has stayed below half the threshold for a quarter second.</li>
+      </ul>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Result</th><th class="num">Algorithm A</th><th class="num">Algorithm B</th></tr></thead>
+        <tbody>
+          <tr><td>Cars counted more than once, 5 mph</td><td class="num">about 100%</td><td class="num">0%</td></tr>
+          <tr><td>Cars counted more than once, 20 mph</td><td class="num">up to 81%</td><td class="num">0%</td></tr>
+          <tr><td>Detected, within 1.0 m of the puck, all speeds</td><td class="num">100%</td><td class="num">100%</td></tr>
+          <tr><td>Detected, 1.5 m off the puck at 65 mph</td><td class="num">45&ndash;79%</td><td class="num">45&ndash;73%</td></tr>
+          <tr><td>False triggers from noise alone</td><td class="num">0 a day</td><td class="num">0 a day</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure><a href="assets/photos/cameron-m3-detect-5mph.png"><img src="assets/photos/cameron-m3-detect-5mph.png" alt="One car at 5 mph. Algorithm A counts it five times; Algorithm B counts it once." loading="lazy"></a><figcaption>One car at 5 mph. Algorithm A counts it five times; Algorithm B counts it once.</figcaption></figure>
+    <div class="outcome text">
+      <p><strong>What it showed:</strong> the fixed burst ends before a slow car has passed, so the next reading counts it again. Algorithm B removes the double counts with no loss in detection, so it's the design going forward. The threshold was set at 0.75 &micro;T: lower, and noise alone triggers about 500 times a day; higher, and a car at the edge of the zone can flicker across it and be counted twice.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- VEHICLE PASS ---------------- -->
+<section id="vehicle-pass" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Vehicle pass test</h2></div>
+    <p class="test-meta">Cameron Denney. Puck. November 14, 2026, RRCC overflow parking lot.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> whether real vehicles match the magnetic simulation, which leaves out each vehicle's own permanent magnetism.</p>
+      <p><strong>How we tested it:</strong> the same magnetometer the puck uses, on a breakout board in a 3D-printed pad, was taped to the pavement and logged at 200 readings a second, the same settings as the puck. Two vehicles drove over it at about 5 mph: a 2023 Kia Sportage Hybrid on electric power, and a lifted 2021 Toyota Tacoma. Each made five passes centered over the sensor, five shifted 1 m to the side, and five in the next lane over, 3.66 m away.</p>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/cameron-m3-test-photo.jpg"><img src="assets/photos/cameron-m3-test-photo.jpg" alt="The setup: sensor pad and logger taped to the pavement, cabled back to the laptop." loading="lazy"></a><figcaption>The setup: sensor pad and logger taped to the pavement, cabled back to the laptop. (Photo by Kyle Lindenmeyer)</figcaption></figure>
+      <figure><a href="assets/photos/cameron-m3-test-setup.png"><img src="assets/photos/cameron-m3-test-setup.png" alt="Top view of the three pass types, and a side view at the sensor." loading="lazy"></a><figcaption>Top view of the three pass types, and a side view at the sensor.</figcaption></figure>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Pass</th><th class="num">Kia</th><th class="num">Tacoma</th><th class="num">Simulation</th></tr></thead>
+        <tbody>
+          <tr><td>Centered</td><td class="num">56.7&ndash;61.2 &micro;T</td><td class="num">22.1&ndash;24.5 &micro;T</td><td class="num">31.4 &micro;T</td></tr>
+          <tr><td>Shifted 1 m</td><td class="num">57.6&ndash;58.8 &micro;T</td><td class="num">22.1&ndash;23.8 &micro;T</td><td class="num">11.4 &micro;T</td></tr>
+          <tr><td>Next lane</td><td class="num">3.5&ndash;4.2 &micro;T</td><td class="num">1.6&ndash;2.0 &micro;T</td><td class="num">under 0.01 &micro;T</td></tr>
+          <tr><td>In-lane passes counted once</td><td class="num met">10 of 10</td><td class="num met">10 of 10</td><td></td></tr>
+          <tr><td>Next-lane passes falsely detected</td><td class="num not-met">4 of 4</td><td class="num not-met">5 of 5</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/cameron-m3-test-centered.png"><img src="assets/photos/cameron-m3-test-centered.png" alt="All five centered passes for each vehicle overlaid, change in field on a log scale" loading="lazy"></a><figcaption>All five centered passes for each vehicle, overlaid. Each vehicle has its own repeatable signature. The dotted line is the original 0.75 &micro;T threshold and the dash-dot line is the new 5 &micro;T threshold.</figcaption></figure>
+      <figure><a href="assets/photos/cameron-m3-test-vs-maxwell.png"><img src="assets/photos/cameron-m3-test-vs-maxwell.png" alt="Measured peak change for every pass against the simulated values, by sideways offset from the sensor" loading="lazy"></a><figcaption>Every measured pass (points) against the simulation (lines), by how far the vehicle was from the sensor sideways.</figcaption></figure>
+    </div>
+    <div class="outcome text">
+      <p><strong>What it showed:</strong> all 29 passes logged cleanly, and every vehicle had its own repeatable signature. Algorithm B counted every in-lane pass exactly once. The surprise was the next lane: the simulation predicted almost nothing there, but real vehicles changed the field by 1.6&ndash;4.2 &micro;T, enough to trigger the puck every time. That's the vehicles' own permanent magnetism, which the model leaves out.</p>
+      <p><strong>What changed:</strong> sweeping the threshold over all 29 passes showed that anything from 4.25 to 16.5 &micro;T counts every in-lane pass once and rejects every next-lane pass. Allowing for the real puck sitting deeper in the road narrows that to about 4.25&ndash;9 &micro;T, so the threshold was raised to about 5 &micro;T. Going higher would also shrink the detection zone. The cabinet computer also adds a check: when pucks in neighboring lanes see a vehicle at the same moment, it keeps the stronger one.</p>
+    </div>
+    <p class="text test-meta">Limits: two vehicles, with the sensor on the surface rather than 50 mm down. No motorcycles, trucks, or vehicles stopped in the next lane yet. Both changes are provisional until the test is repeated with the sensor under a 50 mm spacer.</p>
+  </div>
+</section>
+
+<!-- ---------------- ANTENNA ---------------- -->
+<section id="antenna" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Antenna simulation</h2></div>
+    <p class="test-meta">Cameron Denney. Puck.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> whether a flat patch antenna under the puck's plastic lid can cover the 915 MHz band it needs.</p>
+      <p><strong>How we tested it:</strong> the patch was modeled in Ansys HFSS inside the actual housing, tuned to 915 MHz by trimming its length and moving its feed point, then re-tuned on three board thicknesses.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Result (target: 20 MHz bandwidth)</th><th class="num">1.6 mm board</th><th class="num">3.2 mm board</th><th class="num">6.4 mm board</th></tr></thead>
+        <tbody>
+          <tr><td>Bandwidth</td><td class="num not-met">17.3 MHz</td><td class="num met">24.3 MHz</td><td class="num">40.0 MHz</td></tr>
+          <tr><td>Power actually radiated</td><td class="num">32%</td><td class="num">50%</td><td class="num">69%</td></tr>
+          <tr><td>Peak gain</td><td class="num">1.1 dBi</td><td class="num">3.1 dBi</td><td class="num">4.4 dBi</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/cameron-m3-hfss-s11.png"><img src="assets/photos/cameron-m3-hfss-s11.png" alt="How well each board takes power at each frequency. The shaded band is the 902&ndash;928 MHz band the radio uses." loading="lazy"></a><figcaption>How well each board takes power at each frequency. The shaded band is the 902&ndash;928 MHz band the radio uses.</figcaption></figure>
+      <figure><a href="assets/photos/cameron-m3-hfss-3d.png"><img src="assets/photos/cameron-m3-hfss-3d.png" alt="The 3.2 mm board's radiation pattern, drawn over the puck model. Almost all of it goes straight up." loading="lazy"></a><figcaption>The 3.2 mm board's radiation pattern, drawn over the puck model. Almost all of it goes straight up.</figcaption></figure>
+    </div>
+    <div class="outcome text">
+      <p><strong>What it showed:</strong> the standard 1.6 mm board misses the target and turns two-thirds of its power into heat. The 3.2 mm board meets it, adds 2 dB, and is a standard thickness most board houses offer, so it's the design going forward. The bigger finding is the shape: a patch radiates mostly straight up, but the intersection radio is low on the horizon, where the gain is about 8 dB below peak. That horizon number is the one that matters for range.</p>
+      <p><strong>What changed:</strong> pucks get installed with the feed axis across the lane, which points the stronger side along the road and is worth about 2 dB. Next is a run with asphalt around the housing, and a link budget using the horizon gain.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- BATTERY ---------------- -->
+<section id="battery" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Battery life and burst voltage</h2></div>
+    <p class="test-meta">Cameron Denney. Puck power.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> whether four D cells really last 10 years, and whether the supply holds up when the radio transmits on cold, nearly empty cells.</p>
+      <p><strong>How we tested it:</strong> analysis from the cell and radio datasheets, using the puck's measured current budget, with the cells' capacity derated 15% for cold.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Requirement</th><th>Target</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Service life</td><td>10 years, 20% kept in reserve</td><td><span class="met">20.2 years</span> at the normal load; 10.4 years relaying the entire time</td></tr>
+          <tr><td>Supply during a transmit burst</td><td>Keep the 3.0 V rail up</td><td><span class="met">3.29 V lowest</span>, on cold cells near end of life</td></tr>
+          <tr><td>Peak burst current</td><td>Under 400 mA per cell</td><td><span class="met">About 13 mA per cell</span>, roughly 30&times; margin</td></tr>
+          <tr><td>BMS standby draw</td><td>About 2 &micro;A</td><td><span class="met">About 1.9 &micro;A</span></td></tr>
+          <tr><td>Magnetic offset from the cells</td><td>Well under the 5 &micro;T threshold</td><td><span class="met">About 0.25 &micro;T</span>, removed by the empty-road baseline</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure><a href="assets/photos/cameron-m3-bms-burst.png"><img src="assets/photos/cameron-m3-bms-burst.png" alt="Supply voltage during a transmit burst." loading="lazy"></a><figcaption>Supply voltage during a transmit burst.</figcaption></figure>
+    <div class="outcome text">
+      <p><strong>What changed:</strong> lithium-thionyl chloride cells build up a resistive layer while they sit in storage, which can make the first bursts sag. Each puck now runs a short burst sequence on the bench before it's sealed, and logs the supply while it does, to check the actual cells.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- STEREO ---------------- -->
+<section id="stereo" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Stereo camera field test</h2></div>
+    <p class="test-meta">Simon Wright. Sensor head. November 1, 2026, Red Rocks Community College.</p>
+    <div class="text">
+      <p><strong>What we wanted to know:</strong> which lens and camera spacing give accurate range and speed from 25 to 150 m. The cameras are the most variable part of the sensor head: focal length, spacing, frame rate, and exposure all change the quality of the data.</p>
+      <p><strong>How we tested it:</strong> two Sony A7 IV cameras on tripods stood in for the IMX390 pair, about 1.05 m apart, synced with a clap and a flash. A car drove a known stretch of road at 25 and 35 mph, approaching and departing, with targets from 25 to 150 m. Five setups changed the focal length or the spacing. The clips were then cut down in software to imitate lower frame rates and resolutions, and run through a prototype stereo program.</p>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/simon-m3-field-test-rig.jpg"><img src="assets/photos/simon-m3-field-test-rig.jpg" alt="The stereo test rig." loading="lazy"></a><figcaption>The stereo test rig. (Photo by Simon Wright)</figcaption></figure>
+      <figure><a href="assets/photos/simon-m3-tradeoff-fig.png"><img src="assets/photos/simon-m3-tradeoff-fig.png" alt="Accuracy for each focal length." loading="lazy"></a><figcaption>Accuracy for each focal length.</figcaption></figure>
+    </div>
+    <div class="outcome text">
+      <p><strong>What it showed:</strong> a 50 mm focal length was the best fit. 70 mm was the most accurate overall but couldn't see cars accurately at 25 m, the closest the design needs. Frame rate turned out not to be the limit on speed error, so a 30 fps camera was chosen as the balance between cost and error.</p>
+      <p class="todo">[Simon: add the chosen setup's range and speed error]</p>
+    </div>
+    <div class="figure-row">
+      <figure><a href="assets/photos/simon-m3-speed-accuracy.png"><img src="assets/photos/simon-m3-speed-accuracy.png" alt="Measured range against time for approach and depart runs" loading="lazy"></a><figcaption>Speed accuracy from the field test clips. (Simon Wright)</figcaption></figure>
+      <figure><a href="assets/photos/simon-m3-fps.png"><img src="assets/photos/simon-m3-fps.png" alt="Speed error against frame rate for three fit windows, with the 3 mph requirement line" loading="lazy"></a><figcaption>Speed error at each frame rate, against the 3 mph requirement. (Simon Wright)</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- TWO-LANE MODEL ---------------- -->
+<section id="two-lane" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>Two-lane works-like model</h2></div>
+    <p class="test-meta">Cameron Denney. Puck and cabinet. <span class="status">In progress</span></p>
+    <div class="text">
+      <p><strong>What we want to know:</strong> whether the fixes from the vehicle pass test work together on real hardware: Algorithm B on the puck, and the cabinet's next-lane check.</p>
+      <p><strong>How it works:</strong> a 1:64 scale two-lane track with a magnetometer under each lane. A SparkFun RedBoard plays the puck, reading both sensors and running Algorithm B for each lane. A Raspberry Pi plays the cabinet: it counts each lane's cars and, when both lanes fire at once, drops the weaker one if its peak is under 0.3 times the stronger one. Diecast cars carry a steel strip so the sensors can see them.</p>
+      <p><strong>So far:</strong> the detection code was tested on a computer with simulated passes and realistic noise. It counted every pass exactly once and had no false triggers in 30 minutes of noise alone. A simulated two-minute session with 28 cars matched the counts exactly and dropped all 16 next-lane bumps. It hasn't run on the real sensors yet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- BMS BENCH ---------------- -->
+<section id="bms-bench" class="test">
+  <div class="wrap">
+    <div class="rule-head"><h2>BMS bench tests</h2></div>
+    <p class="test-meta">Isaac Lucero. Puck power. <span class="status">Planned</span></p>
+    <div class="text">
+      <p>These tests check the battery management circuit on the bench, using a power supply and an electronic load in place of the real lithium cells, so no cell is put at risk during a fault test.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Test</th><th>How</th><th>Pass if</th></tr></thead>
+        <tbody>
+          <tr><td>Voltage monitoring</td><td>Compare the microcontroller's readings against a multimeter</td><td>Readings stay within the chosen tolerance</td></tr>
+          <tr><td>Low-voltage warning</td><td>Lower the simulated battery voltage step by step</td><td>The warning trips at the set threshold</td></tr>
+          <tr><td>Overcurrent protection</td><td>Raise the load with a current-limited supply</td><td>Protection acts before any part's limit</td></tr>
+          <tr><td>Temperature monitoring</td><td>Compare the temperature sensor with a reference thermometer, especially in the cold</td><td>Readings stay within datasheet accuracy</td></tr>
+          <tr><td>Power use</td><td>Measure current in standby and active modes</td><td>The BMS stays inside its power budget</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="names">Cameron Denney, Kyle Lindenmeyer, Simon Wright, Isaac Lucero</p>
+    <p>Red Rocks Community College, EGG 1040 Engineering Design, Fall 2026</p>
+    <p class="small">Reducing Off-Peak Delays at Traffic Signals. <a href="report.html">Read the full report</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>
