@@ -64,7 +64,8 @@
       <p class="text">Adaptive signals time themselves to the traffic actually arriving, instead of following a fixed plan. The idea isn't new. Almost no one uses it.</p>
       <ul class="numbers">
         <li><b>&lt;1%</b> <span>of U.S. signals have adaptive control <a href="sources.html#ref-3">[3]</a></span></li>
-        <li><b>$8k&ndash;35k</b> <span>per intersection for existing adaptive systems <a href="sources.html#ref-5">[5]</a></span></li>
+        <li><b>$70,594</b> <span>for our system over 10 years at one intersection. Other adaptive systems: $39,548&ndash;$120,469 <a href="sources.html#ref-5">[5]</a></span></li>
+        <li><b>350</b> <span>side-street cars a day to break even</span></li>
       </ul>
     </div>
     <div class="text">
@@ -79,8 +80,8 @@
   <div class="wrap">
     <div class="rule-head"><h2>How it works</h2></div>
     <ol class="flow">
-      <li><strong>Pucks in the road</strong> time each car 300&ndash;500 m before the light, so the system knows where the gaps will be before they arrive.</li>
-      <li><strong>The sensor head</strong> on the mast arm confirms each car near the light and checks that the crosswalks are clear.</li>
+      <li><strong>Pucks in the road</strong>, in pairs every 100 m out to 500 m, time each car on the way to the light, so the system knows where the gaps will be before they arrive.</li>
+      <li><strong>The sensor head</strong> on the mast arm measures each car's range and speed over the last 150 m, so the prediction is sharpest right before the light.</li>
       <li><strong>The cabinet computer</strong> predicts when each car will reach the stop bar and finds gaps long enough to serve the side street.</li>
       <li><strong>The existing controller</strong> gets a standard call and changes the light. Its minimum greens, clearances, and preemption all stay in charge.</li>
     </ol>
@@ -99,7 +100,7 @@
       </li>
       <li>
         <h3><a href="design.html#fusion">Sensor head</a></h3>
-        <p>Two cameras about a meter apart plus a LiDAR on the existing mast arm. It measures each car's range and speed out to 150 m and watches the crosswalks.</p>
+        <p>Two cameras 1 m apart on a carbon-fiber bar, hung from the existing mast arm. It measures each car's range and speed from 25 to 150 m out.</p>
         <p class="who">Simon Wright</p>
       </li>
       <li>

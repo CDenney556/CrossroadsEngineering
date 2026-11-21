@@ -50,7 +50,7 @@
     <div class="split">
       <div class="text">
         <p class="test-meta">Cameron Denney</p>
-        <p>Pucks go in the travel lane every 100 m, out to 300&ndash;500 m from the stop bar. Each one counts the cars that pass over it and reports them to the intersection, so the computer knows about each car, and each gap, well before it arrives.</p>
+        <p>Pucks go in the travel lane in pairs, 3 m apart, every 100 m out to 500 m from the stop bar. Each pair times the cars that pass over it and reports them to the intersection, so the computer knows about each car, and each gap, well before it arrives.</p>
         <h3>How it detects a car</h3>
         <p>A car is a large mass of steel, and it bends Earth's magnetic field as it passes. A 3-axis magnetometer 50 mm under the road measures that change. The puck checks the field 10 times a second while it waits. When the change crosses a threshold, it switches to 200 readings a second until the car has gone, timestamps the detection, and sends a short packet to the intersection over a 915 MHz LoRa mesh radio.</p>
         <p>The intersection sends out a regular time beacon that keeps every puck's clock in sync. That lets the computer work out speed from the difference between two pucks' timestamps, not from when the radio packets happened to arrive.</p>
@@ -168,21 +168,27 @@
     <div class="split">
       <div class="text">
         <p class="test-meta">Simon Wright</p>
-        <p>The sensor head is the high-accuracy half of detection. It mounts on the existing mast arm, tracks each car as it approaches, and sends its range, speed, and predicted arrival time to the cabinet computer. It also gives the system a view of the crosswalks, so the computer never asks for a change while someone is still crossing.</p>
+        <p>The sensor head is the high-accuracy half of detection. It hangs from the far-side mast arm, about 5.8 m up, and looks back down the approach. It tracks each car from 25 to 150 m out and sends its range, speed, and predicted arrival time to the cabinet computer. That 150 m covers Lakewood's own advance detection zone, which measures speed within about 400 ft of the stop bar.</p>
         <h3>How it works</h3>
-        <p>Two cameras spaced apart see the road from slightly different angles, the way your two eyes do. Comparing the two images gives the distance to each car, and tracking that distance over time gives its speed. A LiDAR adds a second range measurement, mainly to keep the camera pair calibrated.</p>
+        <p>Two cameras 1 m apart see the road from slightly different angles, the way your two eyes do. Comparing the two images gives the distance to each car, and tracking that distance over time gives its speed. The wider apart the cameras, the more accurate the distance, so the 1 m spacing is what lets it measure out to 150 m.</p>
+        <p>That only works if the two cameras stay exactly lined up, so they're mounted on a stiff carbon-fiber bar. Two LiDARs in the middle check the calibration against fixed targets on roadside poles at 35 and 70&nbsp;m.</p>
         <h3>Main parts</h3>
         <ul>
-          <li><strong>Two D3 Embedded IMX390 cameras:</strong> 1920 &times; 1080 at 30 fps, HDR, sealed to IP67, rated &minus;40 to +85 &deg;C.</li>
-          <li><strong>Benewake TF03 LiDAR</strong> for range.</li>
+          <li><strong>Two D3 Embedded IMX390 cameras</strong> with 12 mm lenses: 1920 &times; 1080 at 30 fps, HDR, sealed to IP67, rated &minus;40 to +85 &deg;C. Each one sees 12 m across at 25 m out, enough for three lanes.</li>
+          <li><strong>Two Benewake TF03 LiDARs</strong> for the calibration check.</li>
+          <li><strong>A 1100 mm carbon-fiber bar</strong> holding the cameras 1000 mm apart, inside a roughly 1160 mm outer cover with heated windows for the cameras and LiDARs.</li>
           <li><strong>TI TDA4VM processor</strong> with a built-in stereo engine, so the image processing happens on the pole and only small results go down to the cabinet.</li>
           <li><strong>One PoE++ cable</strong> carries both power and data from the cabinet.</li>
         </ul>
       </div>
       <figure>
-        <a href="assets/photos/simon-m3-block-sketch.png"><img src="assets/photos/simon-m3-block-sketch.png" alt="Block sketch of the sensor head: cameras and LiDAR in, processor, range and speed results out to the cabinet computer" loading="lazy"></a>
-        <figcaption>Block sketch of the pole-mounted sensor head, from inputs to outputs. (Drawn by Simon Wright)</figcaption>
+        <div class="sketch"><img src="assets/img/sketch-fusion.svg" alt="The sensor head as traffic sees it: two cameras 1 m apart at the ends of a bar, two LiDARs in the middle, hanging from the mast arm. Below, a side view: the head about 5.8 m up measures cars from 25 to 150 m down the road." width="548" height="327"></div>
+        <figcaption>The sensor head, simplified from Simon's drawings. Top: the head as approaching traffic sees it. Bottom: the stretch of road it measures (not to scale).</figcaption>
       </figure>
+    </div>
+    <div class="figure-row" style="margin-top:1.5rem">
+      <figure><a href="assets/photos/simon-m3-setup.png"><img src="assets/photos/simon-m3-setup.png" alt="Plan view and side elevation of the intersection, showing the sensor head's field of view, the 25 to 150 m measurement zone, and LiDAR calibration targets at 35 and 70 m" loading="lazy"></a><figcaption>Where the head mounts and what it sees, with the LiDAR calibration targets at 35 and 70 m. (Simon Wright)</figcaption></figure>
+      <figure><a href="assets/photos/simon-m3-dimensioned-sketch.png"><img src="assets/photos/simon-m3-dimensioned-sketch.png" alt="Dimensioned section and top view of the sensor head: main housing, carbon-fiber bar, cameras, LiDARs, and heated windows" loading="lazy"></a><figcaption>Dimensioned section and top view of the head. (Simon Wright)</figcaption></figure>
     </div>
   </div>
 </section>
